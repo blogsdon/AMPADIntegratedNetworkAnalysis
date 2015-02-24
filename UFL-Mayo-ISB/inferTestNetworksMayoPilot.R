@@ -71,7 +71,17 @@ alzheimerGene<-(dfHub$geneId%in%alzGenes)
 alzheimerGWAS <- (dfHub$geneId%in%alzGenetics)
 dfHub <- data.frame(dfHub,alzheimerGene)
 
-enrichment(alzGenes,dfHub$geneId[order(dfHub$sparrowHub,decreasing=T)[1:500]],dfHub$geneId)
+#enrichment(alzGenes,dfHub$geneId[order(dfHub$sparrowHub,decreasing=T)[1:500]],dfHub$geneId)
+sparrowEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$sparrowHub,decreasing=T)]))))
+lassoEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$lassoHub,decreasing=T)]))))
+ssEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$ssHub,decreasing=T)]))))
+ridgeEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$ridgeHub,decreasing=T)]))))
+rfEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$rfHub,decreasing=T)]))))
+aggEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$aggHub,decreasing=T)]))))
+
+pvals <- cbind(sparrowEnrich[,3],lassoEnrich[,3],ssEnrich[,3],ridgeEnrich[,3],rfEnrich[,3],aggEnrich[,3])
+
+
 
 
 tcresult<-as.tableColumns(dfHub)
