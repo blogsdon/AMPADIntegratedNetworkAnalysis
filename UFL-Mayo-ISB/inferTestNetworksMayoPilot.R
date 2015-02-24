@@ -71,6 +71,10 @@ alzheimerGene<-(dfHub$geneId%in%alzGenes)
 alzheimerGWAS <- (dfHub$geneId%in%alzGenetics)
 dfHub <- data.frame(dfHub,alzheimerGene)
 
+png(file='UFL-Mayo-ISB/Figures/hubPairs.png',height=3.42,width=3.42,units='in',res=300,pointsize=10)
+pairs(dfHub[,2:6],pch=16,cex=.8)
+dev.off()
+
 #enrichment(alzGenes,dfHub$geneId[order(dfHub$sparrowHub,decreasing=T)[1:500]],dfHub$geneId)
 sparrowEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$sparrowHub,decreasing=T)]))))
 lassoEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$lassoHub,decreasing=T)]))))
@@ -79,10 +83,15 @@ ridgeEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(al
 rfEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$rfHub,decreasing=T)]))))
 aggEnrich <- data.matrix(as.matrix(enrichmentPath(targetList = as.character(alzGenes), rankedList = as.character(dfHub$geneId[order(dfHub$aggHub,decreasing=T)]))))
 
-pvals <- cbind(sparrowEnrich[,3],lassoEnrich[,3],ssEnrich[,3],ridgeEnrich[,3],rfEnrich[,3],aggEnrich[,3])
+pvals <- apply(cbind(sparrowEnrich[,3],lassoEnrich[,3],ssEnrich[,3],ridgeEnrich[,3],rfEnrich[,3],aggEnrich[,3]),2,as.numeric)
+enr<- apply(cbind(sparrowEnrich[,2],lassoEnrich[,2],ssEnrich[,2],ridgeEnrich[,2],rfEnrich[,2],aggEnrich[,2]),2,as.numeric)
 
 
-
+png(file='UFL-Mayo-ISB//Figures/enrichmentPlot.png',height=3.42,width=3.42,units='in',res=300,pointsize=10)
+matplot(matrix(rep(1:1000,6),1000,6),-log10(pvals),'l',lty=1:6,lwd=2,ylim=c(0,8),xlab='Ranked Expression Hubs',main='Enrichment for known Alz Genes\nin TCX RNAseq networks')
+legend('topright',c('Sparrow','Lasso','Stability Selection','Ridge','Random Forest','Aggregate'),col=1:6,lty=1:6,lwd=3,cex=.6)
+dev.off()
+matplot(matrix(rep(1:1000,6),1000,6),enr,'l',lty=1:6,lwd=3)
 
 tcresult<-as.tableColumns(dfHub)
 cols<-tcresult$tableColumns
@@ -91,4 +100,4 @@ projectId<-"syn3243392"
 schema<-TableSchema(name="TCX Alzheimer Preliminary Integrated Analysis", parent=projectId, columns=cols)
 table<-Table(schema, fileHandleId)
 table<-synStore(table, retrieveData=TRUE)
-
+#onWeb(table)
