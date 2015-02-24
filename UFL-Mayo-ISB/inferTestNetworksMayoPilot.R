@@ -4,6 +4,7 @@ synapseLogin()
 res <- synQuery('select name, id from file where projectId=="syn2580853" and center=="UFL-Mayo-ISB" and disease=="Alzheimers Disease" and platform=="IlluminaHiSeq2000" and other=="geneCounts" and other=="Normalized"')
 synObj <- synGet(res$file.id)
 
+source('ensembl2symbol.R')
 #Read in data
 tcxAlzheimer <- read.table(synObj@filePath)
 
@@ -23,7 +24,7 @@ ssNet <- matrix(0,1e3,1e3)
 ridgeNet <- matrix(0,1e3,1e3)
 rfNet <- matrix(0,1e3,1e3)
 xnorm <- scale(tcxAlzheimer1000)
-for (i in 1:1000){
+for (i in 740:1000){
   y <- xnorm[,i]
   x <- xnorm[,-i]
   eigen <- svd(x)$d^2
@@ -35,3 +36,20 @@ for (i in 1:1000){
   rfNet[i,-i] <- res[,5];
   cat('finished ',i,'of 1000\n')
 }
+sparrowNetAvg <- sparrowNet/2+t(sparrowNet)/2
+lassoNetAvg <- lassoNet/2+t(lassoNet)/2
+ssNetAvg <- ssNet/2+t(ssNet)/2
+ridgeNetAvg <- ridgeNet/2+t(ridgeNet)/2
+rfNetAvg <- rfNet/2+t(rfNet)/2
+
+sparrowHub <- rowSums(sparrowNetAvg)
+lassoHub <- rowSums(lassoNetAvg)
+ssHub <- rowSums(ssNetAvg)
+ridgeHub <- rowSums(ridgeNetAvg)
+rfHub <- rowSums(rfNetAvg)
+
+geneId <- ensembl2symbol(colnames(tcxAlzheimer1000))
+names(geneId) <- colnames(tcxAlzheimer1000)
+dfHub <- data.frame(geneId,sparrowHub,lassoHub,ssHub,ridgeHub,rfHub,row.names=colnames(tcxAlzheimer1000))
+
+
