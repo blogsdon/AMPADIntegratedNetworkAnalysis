@@ -24,7 +24,7 @@ ssNet <- matrix(0,1e3,1e3)
 ridgeNet <- matrix(0,1e3,1e3)
 rfNet <- matrix(0,1e3,1e3)
 xnorm <- scale(tcxAlzheimer1000)
-for (i in 740:1000){
+for (i in 1:1000){
   y <- xnorm[,i]
   x <- xnorm[,-i]
   eigen <- svd(x)$d^2
@@ -36,7 +36,17 @@ for (i in 740:1000){
   rfNet[i,-i] <- res[,5];
   cat('finished ',i,'of 1000\n')
 }
-sparrowNetAvg <- sparrowNet/2+t(sparrowNet)/2 > .95
+
+for (i in 1:1000){
+  y <- xnorm[,i]
+  x <- xnorm[,-i]
+  res <- vbsrWrapperZ(y=y,x=x)
+  sparrowNet[i,-i] <- res
+  cat('finished ',i,'of 1000\n')
+}
+
+sparrowNetAvg <- sparrowNet/2+t(sparrowNet)/2
+sparrowNetAvg <- sparrowNetAvg^2>qchisq(0.05/choose(1000,2),1,lower.tail=F)
 lassoNetAvg <- lassoNet/2+t(lassoNet)/2
 ssNetAvg <- ssNet/2+t(ssNet)/2
 ridgeNetAvg <- ridgeNet/2+t(ridgeNet)/2
@@ -61,8 +71,7 @@ alzheimerGene<-(dfHub$geneId%in%alzGenes)
 alzheimerGWAS <- (dfHub$geneId%in%alzGenetics)
 dfHub <- data.frame(dfHub,alzheimerGene)
 
-
-enrichment(alzGenes,dfHub$geneId[order(dfHub$aggHub,decreasing=T)[1:100]],dfHub$geneId)
+enrichment(alzGenes,dfHub$geneId[order(dfHub$sparrowHub,decreasing=T)[1:500]],dfHub$geneId)
 
 
 tcresult<-as.tableColumns(dfHub)
