@@ -17,11 +17,21 @@ top1000 <- order(genesd,decreasing=T)[1:1000]
 tcxAlzheimer1000 <- data.matrix(t(as.matrix(tcxAlzheimer)[top1000,]))
 
 library(metaNet)
-x <- scale(tcxAlzheimer1000)
-y <- tcxAlzheimer1000[,3]
-x <- x[,-3]
-eigen <- svd(x)$d^2
-system.time(res <- metaReg(y = y,x = x,eigen = eigen))
-
-
-
+sparrowNet <- matrix(0,1e3,1e3)
+lassoNet <- matrix(0,1e3,1e3)
+ssNet <- matrix(0,1e3,1e3)
+ridgeNet <- matrix(0,1e3,1e3)
+rfNet <- matrix(0,1e3,1e3)
+xnorm <- scale(tcxAlzheimer1000)
+for (i in 1:1000){
+  y <- xnorm[,i]
+  x <- xnorm[,-i]
+  eigen <- svd(x)$d^2
+  system.time(res <- metaReg(y = y,x = x,eigen = eigen))
+  sparrowNet[i,-i] <- res[,1];
+  lassoNet[i,-i] <- res[,2];
+  ssNet[i,-i] <- res[,3];
+  ridgeNet[i,-i] <- res[,4];
+  rfNet[i,-i] <- res[,5];
+  cat('finished ',i,'of 1000\n')
+}
